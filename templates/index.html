@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f4f4;
+        }
+        #chatbox {
+            width: 300px;
+            margin: 50px auto;
+            padding: 10px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+        }
+        #input {
+            display: flex;
+        }
+        #input textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: none;
+        }
+        #input button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #28a745;
+            color: #fff;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chatbox">
+        <div id="messages"></div>
+        <div id="input">
+            <textarea id="userInput" rows="3" placeholder="Type your symptoms here..."></textarea>
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('sendButton').addEventListener('click', function() {
+            const userInput = document.getElementById('userInput').value;
+            if (userInput.trim() === '') return;
+
+            const days = prompt('Enter the number of days you have been experiencing the symptoms:');
+
+            const message = document.createElement('div');
+            message.textContent = 'You: ' + userInput;
+            document.getElementById('messages').appendChild(message);
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ symptoms: userInput, days: days })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responseMessage = document.createElement('div');
+                responseMessage.textContent = 'Bot: ' + data.condition;
+                document.getElementById('messages').appendChild(responseMessage);
+
+                const disease1Message = document.createElement('div');
+                disease1Message.textContent = 'Disease 1: ' + data.disease1;
+                document.getElementById('messages').appendChild(disease1Message);
+
+                const description1Message = document.createElement('div');
+                description1Message.textContent = 'Description: ' + data.description1;
+                document.getElementById('messages').appendChild(description1Message);
+
+                const disease2Message = document.createElement('div');
+                disease2Message.textContent = 'Disease 2: ' + data.disease2;
+                document.getElementById('messages').appendChild(disease2Message);
+
+                const description2Message = document.createElement('div');
+                description2Message.textContent = 'Description: ' + data.description2;
+                document.getElementById('messages').appendChild(description2Message);
+
+                const precautionsMessage = document.createElement('div');
+                precautionsMessage.textContent = 'Precautions: ' + data.precautions.join(', ');
+                document.getElementById('messages').appendChild(precautionsMessage);
+
+                document.getElementById('userInput').value = '';
+                document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const errorMessage = document.createElement('div');
+                errorMessage.textContent = 'Error: Could not get a response from the server.';
+                document.getElementById('messages').appendChild(errorMessage);
+            });
+        });
+    </script>
+</body>
+</html>
